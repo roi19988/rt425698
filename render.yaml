@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: nature-lens-api
+    runtime: node
+    plan: free
+    buildCommand: node --check server/index.cjs
+    startCommand: node server/index.cjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: HOST
+        value: 0.0.0.0
+      - key: PLANTNET_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        sync: false
+
