@@ -1,0 +1,21 @@
+export type Photo = { uri: string; base64: string; mimeType: string };
+export type Source = { title: string; url: string };
+export type Identification = {
+  commonName: string;
+  scientificName: string;
+  family: string;
+  confidence: 'high' | 'moderate' | 'low';
+  clues: string[];
+  alternatives: string[];
+  additionalPhoto: string | null;
+  edibility: string;
+  toxicity: string;
+  traditionalUses: string;
+  otherUses: string;
+  facts: string[];
+  sources: Source[];
+  safetyVerified: boolean;
+  explanationStatus?: 'ready' | 'unavailable';
+  explanationNotice?: string;
+  searchEntryPoint?: string;
+};

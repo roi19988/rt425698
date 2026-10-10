@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "מבט לטבע",
+    "slug": "nature-lens",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": { "package": "com.naturelens.app" },
+    "plugins": [["expo-image-picker", {
+      "photosPermission": "בחירת תמונות לצורך זיהוי בטבע",
+      "cameraPermission": "צילום צמחים ויצורים לצורך זיהוי",
+      "microphonePermission": false
+    }]]
+  }
+}
