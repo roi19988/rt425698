@@ -1,0 +1,11 @@
+node_modules/
+.tools/
+.expo/
+dist/
+dist-android/
+web-build/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+nature-lens-source.zip
