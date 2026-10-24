@@ -35,6 +35,7 @@ test('summary and expanded details render the reusable safety state', () => {
   assert.match(app, /field\.safety && <SafetyStatus verified=\{result\.safetyVerified\} \/>/);
   assert.match(app, /accessible=\{!compact\}/);
   assert.match(app, /summarySafetyAccessibilityLabel\(field\.name, field\.text, result\.safetyVerified\)/);
+  assert.match(app, /key=\{field\.name\} accessibilityRole="button" accessibilityLabel=/);
   assert.match(app, /accordionHeader:\{minHeight:44\}/);
   assert.match(app, /ודאות הזיהוי ומצב אימות הבטיחות הם מדדים נפרדים/);
   assert.match(app, /accessibilityRole="alert"/);
