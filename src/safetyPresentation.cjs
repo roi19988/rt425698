@@ -6,4 +6,8 @@ function safetyStatusText(safetyVerified) {
   return safetyVerified ? VERIFIED_SAFETY_TEXT : UNVERIFIED_SAFETY_TEXT;
 }
 
-module.exports = { IMAGE_IDENTIFICATION_WARNING, UNVERIFIED_SAFETY_TEXT, VERIFIED_SAFETY_TEXT, safetyStatusText };
+function summarySafetyAccessibilityLabel(fieldName, description, safetyVerified) {
+  return `${fieldName}. ${safetyStatusText(safetyVerified)} ${description} פתיחת פרטים`;
+}
+
+module.exports = { IMAGE_IDENTIFICATION_WARNING, UNVERIFIED_SAFETY_TEXT, VERIFIED_SAFETY_TEXT, safetyStatusText, summarySafetyAccessibilityLabel };
