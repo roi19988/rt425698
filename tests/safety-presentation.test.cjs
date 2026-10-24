@@ -18,6 +18,10 @@ test('verified presentation remains separate from permission to eat or handle th
 
 test('image identification warning does not equate confidence with safety', () => {
   assert.match(IMAGE_IDENTIFICATION_WARNING, /זיהוי מתמונה אינו אישור/);
+  assert.match(IMAGE_IDENTIFICATION_WARNING, /לאכילה, למגע או לשימוש רפואי/);
+  assert.match(IMAGE_IDENTIFICATION_WARNING, /אין לאכול, לטעום/);
+  assert.match(IMAGE_IDENTIFICATION_WARNING, /לתת לבעלי חיים/);
+  assert.match(IMAGE_IDENTIFICATION_WARNING, /זיהוי מתמונה בלבד/);
   assert.doesNotMatch(IMAGE_IDENTIFICATION_WARNING, /ודאות גבוהה.*בטוח/);
 });
 
@@ -39,4 +43,7 @@ test('summary and expanded details render the reusable safety state', () => {
   assert.match(app, /accordionHeader:\{minHeight:44\}/);
   assert.match(app, /ודאות הזיהוי ומצב אימות הבטיחות הם מדדים נפרדים/);
   assert.match(app, /accessibilityRole="alert"/);
+  assert.match(app, /accessibilityLabel=\{IMAGE_IDENTIFICATION_WARNING\}/);
+  assert.match(app, /<Text style=\{s\.warningBody\}>\{IMAGE_IDENTIFICATION_WARNING\}<\/Text>/);
+  assert.doesNotMatch(app, /\{IMAGE_IDENTIFICATION_WARNING\} אין לאכול/);
 });

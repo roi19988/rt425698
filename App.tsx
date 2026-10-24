@@ -140,7 +140,7 @@ export default function App() {
           <Text style={s.resultName}>{result.commonName}</Text>
           <Text style={s.scientific}>{result.scientificName}</Text>
           <View style={s.meta}><Text style={s.pill}>ודאות הזיהוי: {confidence[result.confidence]}</Text><Text style={s.subtitle}>{result.family}</Text></View>
-          <View accessible accessibilityRole="alert" accessibilityLabel={IMAGE_IDENTIFICATION_WARNING} style={s.warning}><View style={s.sectionRow}>{icon('warning-outline','#8B641E',20)}<Text style={s.warningTitle}>אזהרת בטיחות</Text></View><Text style={s.warningBody}>{IMAGE_IDENTIFICATION_WARNING} אין לאכול, לטעום או לתת לבעלי חיים צמח על סמך זיהוי מתמונה בלבד.</Text></View>
+          <View accessible accessibilityRole="alert" accessibilityLabel={IMAGE_IDENTIFICATION_WARNING} style={s.warning}><View style={s.sectionRow}>{icon('warning-outline','#8B641E',20)}<Text style={s.warningTitle}>אזהרת בטיחות</Text></View><Text style={s.warningBody}>{IMAGE_IDENTIFICATION_WARNING}</Text></View>
           {!!result.explanationNotice && <Text style={s.hebrew}>{result.explanationNotice}</Text>}
           {photosChanged && <Text style={s.note}>התמונות השתנו. יש לעדכן את הזיהוי כדי לבדוק את המידע החדש.</Text>}
           {screen === 'result' ? <>
