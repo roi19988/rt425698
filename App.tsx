@@ -7,12 +7,21 @@ import { identify, identifyUrl } from './src/identify';
 import { Identification, Photo } from './src/types';
 import SearchAttribution from './src/SearchAttribution';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { IMAGE_IDENTIFICATION_WARNING, safetyStatusText } from './src/safetyPresentation.cjs';
 
 const confidence = { high: 'גבוהה', moderate: 'בינונית', low: 'נמוכה' };
 const tabs = ['היכרות', 'אכילות ורעילות', 'שימושים'] as const;
 
 function Button({ children, onPress, secondary = false, disabled = false }: { children: string; onPress: () => void; secondary?: boolean; disabled?: boolean }) {
   return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({ pressed }) => [s.button, secondary && s.secondary, (disabled || pressed) && { opacity: 0.55 }]}><Text style={[s.buttonText, secondary && { color: '#23583f' }]}>{children}</Text></Pressable>;
+}
+
+function SafetyStatus({ verified, compact = false }: { verified: boolean; compact?: boolean }) {
+  const text = safetyStatusText(verified);
+  return <View accessible accessibilityRole="text" accessibilityLabel={`מצב אימות בטיחות: ${text}`} style={[s.safetyStatus, verified && s.safetyStatusVerified]}>
+    <Ionicons name={verified ? 'checkmark-circle-outline' : 'warning-outline'} size={18} color={verified ? '#315F46' : '#806127'} />
+    <Text style={[s.safetyStatusText, compact && s.safetyStatusTextCompact]}>{text}</Text>
+  </View>;
 }
 
 export default function App() {
@@ -76,11 +85,11 @@ export default function App() {
   const hero = require('./assets/olive-editorial.png');
   const image = photos[0] ? { uri: photos[0].uri } : hero;
   const fields = result ? [
-    { name: 'אכילות', icon: 'restaurant-outline' as const, text: result.edibility },
-    { name: 'רעילות', icon: 'shield-checkmark-outline' as const, text: result.toxicity },
-    { name: 'שימושים מסורתיים', icon: 'book-outline' as const, text: result.traditionalUses },
-    { name: 'עובדות מעניינות', icon: 'sparkles-outline' as const, text: result.facts.join('\n\n') },
-    { name: 'בית גידול ואקולוגיה', icon: 'leaf-outline' as const, text: result.otherUses },
+    { name: 'אכילות', icon: 'restaurant-outline' as const, text: result.edibility, safety: true },
+    { name: 'רעילות', icon: 'shield-checkmark-outline' as const, text: result.toxicity, safety: true },
+    { name: 'שימושים מסורתיים', icon: 'book-outline' as const, text: result.traditionalUses, safety: false },
+    { name: 'עובדות מעניינות', icon: 'sparkles-outline' as const, text: result.facts.join('\n\n'), safety: false },
+    { name: 'בית גידול ואקולוגיה', icon: 'leaf-outline' as const, text: result.otherUses, safety: false },
   ] : [];
   function navigate(next: typeof screen) { setScreen(next); scroll.current?.scrollTo({ y: 0, animated: false }); }
   function saveCurrent() {
@@ -131,16 +140,16 @@ export default function App() {
           <Text style={s.resultName}>{result.commonName}</Text>
           <Text style={s.scientific}>{result.scientificName}</Text>
           <View style={s.meta}><Text style={s.pill}>ודאות הזיהוי: {confidence[result.confidence]}</Text><Text style={s.subtitle}>{result.family}</Text></View>
-          <View style={s.warning}><View style={s.sectionRow}>{icon('warning-outline','#8B641E',20)}<Text style={s.warningTitle}>זיהוי מתמונה אינו אישור לאכילה</Text></View><Text style={s.warningBody}>אין לאכול, לטעום או לתת לבעלי חיים צמח על סמך זיהוי מתמונה בלבד.</Text></View>
+          <View accessible accessibilityRole="alert" accessibilityLabel={IMAGE_IDENTIFICATION_WARNING} style={s.warning}><View style={s.sectionRow}>{icon('warning-outline','#8B641E',20)}<Text style={s.warningTitle}>אזהרת בטיחות</Text></View><Text style={s.warningBody}>{IMAGE_IDENTIFICATION_WARNING} אין לאכול, לטעום או לתת לבעלי חיים צמח על סמך זיהוי מתמונה בלבד.</Text></View>
           {!!result.explanationNotice && <Text style={s.hebrew}>{result.explanationNotice}</Text>}
           {photosChanged && <Text style={s.note}>התמונות השתנו. יש לעדכן את הזיהוי כדי לבדוק את המידע החדש.</Text>}
           {screen === 'result' ? <>
-            {fields.slice(0,4).map(field => <Pressable key={field.name} style={s.infoCard} onPress={() => {setExpanded(field.name);navigate('details');}}><View style={s.infoIcon}>{icon(field.icon)}</View><View style={{flex:1}}><Text style={s.sectionTitle}>{field.name}</Text><Text numberOfLines={2} style={s.hebrew}>{field.text}</Text></View>{icon('chevron-back','#87958B',18)}</Pressable>)}
+            {fields.slice(0,4).map(field => <Pressable key={field.name} accessibilityLabel={`${field.name}. ${field.safety ? safetyStatusText(result.safetyVerified) : ''} פתיחת פרטים`} style={s.infoCard} onPress={() => {setExpanded(field.name);navigate('details');}}><View style={s.infoIcon}>{icon(field.icon)}</View><View style={{flex:1}}><Text style={s.sectionTitle}>{field.name}</Text>{field.safety && <SafetyStatus verified={result.safetyVerified} compact />}<Text numberOfLines={2} style={s.hebrew}>{field.text}</Text></View>{icon('chevron-back','#87958B',18)}</Pressable>)}
             <Button secondary onPress={() => navigate('details')}>לפרטים המלאים ←</Button>
             {!demo && <Button secondary onPress={() => navigate('scanner')}>הוספת תמונה נוספת</Button>}
           </> : <>
             <Text style={s.sectionTitle}>להכיר את הצמח לעומק</Text>
-            {[{name:'מאפייני הזיהוי',icon:'scan-outline' as const,text:result.clues.join('\n\n')},...fields,{name:'מינים דומים',icon:'git-branch-outline' as const,text:result.alternatives.join('\n') || 'לא הוחזרו אפשרויות נוספות.'}].map(field => <View key={field.name} style={s.accordion}><Pressable accessibilityRole="button" accessibilityState={{expanded:expanded===field.name}} style={s.sectionRow} onPress={() => setExpanded(expanded===field.name ? '' : field.name)}><View style={s.brandRow}>{icon(field.icon, '#193D32',20)}<Text style={s.sectionTitle}>{field.name}</Text></View>{icon(expanded===field.name ? 'remove' : 'add', '#193D32',20)}</Pressable>{expanded===field.name && <Text style={s.hebrew}>{field.text}</Text>}</View>)}
+            {[{name:'מאפייני הזיהוי',icon:'scan-outline' as const,text:result.clues.join('\n\n'),safety:false},...fields,{name:'מינים דומים',icon:'git-branch-outline' as const,text:result.alternatives.join('\n') || 'לא הוחזרו אפשרויות נוספות.',safety:false}].map(field => <View key={field.name} style={s.accordion}><Pressable accessibilityRole="button" accessibilityState={{expanded:expanded===field.name}} accessibilityLabel={`${field.name}${field.safety ? `. מצב אימות בטיחות: ${safetyStatusText(result.safetyVerified)}` : ''}`} style={s.sectionRow} onPress={() => setExpanded(expanded===field.name ? '' : field.name)}><View style={s.brandRow}>{icon(field.icon, '#193D32',20)}<Text style={s.sectionTitle}>{field.name}</Text></View>{icon(expanded===field.name ? 'remove' : 'add', '#193D32',20)}</Pressable>{expanded===field.name && <View>{field.safety && <SafetyStatus verified={result.safetyVerified} />}<Text style={s.hebrew}>{field.text}</Text>{field.safety && <Text style={s.note}>ודאות הזיהוי ומצב אימות הבטיחות הם מדדים נפרדים. גם זיהוי בוודאות גבוהה אינו מעיד שהפרט בטוח.</Text>}</View>}</View>)}
             <Text style={s.note}>שימושים רפואיים מסורתיים מתארים היסטוריה ותרבות ואינם המלצה לטיפול.</Text>
             {result.additionalPhoto && <View style={s.card}><Text style={s.sectionTitle}>תמונה נוספת יכולה לעזור</Text><Text style={s.hebrew}>{result.additionalPhoto}</Text></View>}
             {result.sources.length > 0 && <View style={s.card}><Text style={s.sectionTitle}>מקורות וקריאה נוספת</Text>{result.sources.map((source,index) => <Pressable key={index} accessibilityRole="link" onPress={() => Linking.openURL(source.url).catch(() => setError('לא ניתן לפתוח את המקור.'))}><Text style={s.link}>{source.title} ↗</Text></Pressable>)}</View>}
@@ -171,7 +180,8 @@ const s = StyleSheet.create({
  scanner:{height:490,borderRadius:24,overflow:'hidden',backgroundColor:'#193D32'},cameraTop:{position:'absolute',top:24,left:24,right:24,gap:8},cameraText:{textAlign:'right',writingDirection:'rtl',fontSize:11,letterSpacing:0,color:'#fff'},cameraHint:{color:'#fff',fontSize:12,textAlign:'center',lineHeight:20},scanFrame:{position:'absolute',left:40,right:40,top:120,height:225,borderWidth:1,borderColor:'rgba(255,255,255,0.6)',borderRadius:24},cameraBottom:{position:'absolute',bottom:38,left:28,right:28,gap:24},cameraControls:{flexDirection:'row-reverse',justifyContent:'space-between',alignItems:'center'},shutter:{width:72,height:72,borderRadius:40,borderWidth:2,borderColor:'#fff',padding:6},shutterInner:{flex:1,borderRadius:40,backgroundColor:'#fff'},previewBadge:{position:'absolute',bottom:10,alignSelf:'center',fontSize:8,color:'#fff',letterSpacing:0},
  card:{backgroundColor:'#FDFCFA',padding:18,borderRadius:16,borderWidth:1,borderColor:'#E3E6DC',gap:14},photoRow:{gap:12},photo:{width:90,height:105,borderRadius:10},remove:{fontSize:11,color:'#758176',textAlign:'center',padding:8},consent:{flexDirection:'row-reverse',gap:10,alignItems:'center'},
  resultPhoto:{width:'100%',height:300,borderRadius:20},detailPhoto:{width:'100%',height:220,borderRadius:20},resultName:{textAlign:'right',writingDirection:'rtl',fontFamily:serif,fontSize:34,lineHeight:42,color:'#193D32'},scientific:{textAlign:'right',writingDirection:'ltr',fontFamily:serif,fontStyle:'italic',fontSize:15,color:'#7B877B',lineHeight:24},meta:{flexDirection:'row-reverse',gap:12,alignItems:'center',flexWrap:'wrap'},pill:{textAlign:'right',writingDirection:'rtl',fontSize:11,color:'#49634D',backgroundColor:'#E8EEE3',paddingVertical:8,paddingHorizontal:12,borderRadius:20},
- warning:{backgroundColor:'#F4EDDD',padding:16,borderRadius:14,gap:9,borderWidth:1,borderColor:'#E9DFC8'},warningTitle:{textAlign:'right',writingDirection:'rtl',fontSize:12,fontWeight:'600',color:'#806127',flex:1},warningBody:{textAlign:'right',writingDirection:'rtl',fontSize:12,lineHeight:20,color:'#826D47'},banner:{backgroundColor:'#E8EDE5',padding:12,borderRadius:12},note:{textAlign:'right',writingDirection:'rtl',fontSize:12,lineHeight:21,color:'#7B8274'},
+ warning:{backgroundColor:'#F4EDDD',padding:16,borderRadius:14,gap:9,borderWidth:1,borderColor:'#E9DFC8'},warningTitle:{textAlign:'right',writingDirection:'rtl',fontSize:12,fontWeight:'600',color:'#806127',flex:1},warningBody:{textAlign:'right',writingDirection:'rtl',fontSize:12,lineHeight:20,color:'#6B532E'},banner:{backgroundColor:'#E8EDE5',padding:12,borderRadius:12},note:{textAlign:'right',writingDirection:'rtl',fontSize:12,lineHeight:21,color:'#7B8274'},
+ safetyStatus:{flexDirection:'row-reverse',alignItems:'flex-start',gap:7,marginTop:8,paddingVertical:8,paddingHorizontal:10,borderRadius:10,borderWidth:1,borderColor:'#E2D5B6',backgroundColor:'#F8F1E2'},safetyStatusVerified:{borderColor:'#C9DCCF',backgroundColor:'#EDF4EE'},safetyStatusText:{flex:1,textAlign:'right',writingDirection:'rtl',fontSize:13,lineHeight:21,fontWeight:'600',color:'#654E2A'},safetyStatusTextCompact:{fontSize:12,lineHeight:19},
  infoCard:{flexDirection:'row-reverse',gap:12,alignItems:'center',backgroundColor:'#FDFCFA',borderWidth:1,borderColor:'#E3E6DC',borderRadius:16,padding:16},infoIcon:{padding:10,borderRadius:12,backgroundColor:'#EAF0E6'},hebrew:{fontSize:14,lineHeight:24,color:'#5B675E',textAlign:'right',writingDirection:'rtl',marginTop:7},accordion:{paddingVertical:18,borderBottomWidth:1,borderColor:'#E1E5DA',gap:8},
  nav:{flexDirection:'row-reverse',borderTopWidth:1,borderColor:'#E1E5DA',backgroundColor:'#F8F7F2',paddingVertical:13},navItem:{flex:1,alignItems:'center',gap:6},navLabel:{fontSize:10,color:'#6A7B6E'},footer:{fontSize:10,lineHeight:18,textAlign:'center',color:'#8F988B',marginTop:10}
 });
