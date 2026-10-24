@@ -9,7 +9,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "server": "node --env-file=server/.env server/index.cjs",
-    "test": "node --test tests"
+    "test": "node --test tests/gemini.test.cjs tests/plantnet.test.cjs tests/safety-presentation.test.cjs tests/validation.test.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
