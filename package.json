@@ -9,16 +9,17 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "server": "node --env-file=server/.env server/index.cjs",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/gemini.test.cjs tests/plantnet.test.cjs tests/safety-presentation.test.cjs tests/validation.test.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
-    "expo": "~55.0.0",
+    "expo": "~55.0.32",
+    "expo-font": "~55.0.8",
     "expo-image-picker": "~55.0.0",
     "expo-status-bar": "~55.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-native": "0.83.2",
+    "react-native": "0.83.10",
     "react-native-web": "^0.21.0",
     "react-native-webview": "^13.16.0"
   },
